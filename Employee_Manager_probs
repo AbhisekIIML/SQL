@@ -1,0 +1,17 @@
+1) Code to find the Employee-Manager relationship:
+
+select e.Emp_Name,e.Salary,e.Manager_Id,coalesce(d.Emp_Name,' ') as Manager_Name from 
+	(select c.Emp_Name,c.Manager_Id,c.Salary from 
+		(select a.Emp_Id,b.Emp_Name,b.Salary,a.Manager_Id 
+			from walm_1 as a left join walm_2 as b on a.Emp_Id=b.Emp_Id) as c) as e
+		left join walm_2 as d on e.Manager_Id=d.Emp_Id
+    
+2) Code to find the Manager having the Employees with second highest average salary:
+
+select fin.Manager_Name from (select TOP 100 percent Sal.Manager_Id,Sal.Manager_Name,sum(Sal.Salary) as Tot_Salary, 
+	dense_rank() over (order by sum(Sal.Salary) DESC) as Ranky from (select e.Emp_Name,e.Salary,e.Manager_Id,coalesce(d.Emp_Name,' ') as Manager_Name from 
+	(select c.Emp_Name,c.Manager_Id,c.Salary from 
+		(select a.Emp_Id,b.Emp_Name,b.Salary,a.Manager_Id 
+			from walm_1 as a left join walm_2 as b on a.Emp_Id=b.Emp_Id) as c) as e
+		left join walm_2 as d on e.Manager_Id=d.Emp_Id) as Sal group by Sal.Manager_Id,Sal.Manager_Name having len(Sal.Manager_Id)>0
+		order by Tot_Salary DESC) as fin where fin.Ranky=2
