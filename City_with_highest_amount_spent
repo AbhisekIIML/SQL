@@ -1,0 +1,9 @@
+--The main aim is to find the city where a particular user has spent the highest amount so far:
+
+select Veda_2.[User_Id],Veda_2.Place,Veda_2.Amount,ft.NP from
+	(select [User_Id],Place as NP,Max_Amnt from 
+		(select [User_Id],Place,Amount,
+			max(Amount) over (partition by [User_Id] order by (select NULL)) as Max_Amnt,
+			dense_rank() over(partition by [User_Id] order by Amount DESC) as Grp_row from Veda_2) as nt where nt.Grp_row=1)as ft
+	right join
+	Veda_2 on Veda_2.[User_Id]=ft.[User_Id]
